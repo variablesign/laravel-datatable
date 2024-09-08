@@ -3,6 +3,7 @@
 namespace VariableSign\DataTable;
 
 use Illuminate\Support\ServiceProvider;
+use VariableSign\DataTable\Console\DataTableMakeCommand;
 
 class DataTableServiceProvider extends ServiceProvider
 {
@@ -17,11 +18,11 @@ class DataTableServiceProvider extends ServiceProvider
         // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'datatable');
         // $this->loadViewsFrom(__DIR__.'/../resources/views', 'datatable');
         // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        // $this->loadRoutesFrom(__DIR__.'/routes.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/config.php' => config_path('datatable.php'),
+                __DIR__.'/../config/datatable.php' => config_path('datatable.php'),
             ], 'config');
 
             // Publishing the views.
@@ -40,7 +41,9 @@ class DataTableServiceProvider extends ServiceProvider
             ], 'lang');*/
 
             // Registering package commands.
-            // $this->commands([]);
+            $this->commands([
+                DataTableMakeCommand::class,
+            ]);
         }
     }
 
@@ -50,11 +53,11 @@ class DataTableServiceProvider extends ServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'datatable');
+        $this->mergeConfigFrom(__DIR__.'/../config/datatable.php', 'datatable');
 
         // Register the main class to use with the facade
-        $this->app->singleton('datatable', function () {
-            return new DataTable;
-        });
+        // $this->app->singleton('datatable', function () {
+        //     return new DataTable; 
+        // });
     }
 }

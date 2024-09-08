@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @mixin \VariableSign\DataTable\DataTable
- * @method static \VariableSign\DataTable\DataTable columns()
+ * @method static array columns()
  * @see \VariableSign\DataTable\DataTable
  */
 class DataTable extends Facade

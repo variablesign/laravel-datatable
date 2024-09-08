@@ -4,7 +4,8 @@ namespace {{ datatableNamespace }};
 
 use {{ namespacedModel }};
 use App\Models\Role;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\View\View;
 use VariableSign\DataTable\Filter;
@@ -97,7 +98,7 @@ class {{ datatableClass }} extends DataTable
         ];
     }
 
-    protected function dataSource(): Builder|QueryBuilder
+    protected function dataSource(): Builder|QueryBuilder|Collection
     {
         return {{ model }}::with('role');
     }
