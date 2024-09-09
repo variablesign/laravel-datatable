@@ -53,22 +53,38 @@ abstract class DataTable
 
     private ?string $defaultOrderColumn = null;
 
-    private string $data;
+    private array $data;
 
     public function __construct(array $data = [])
     {
-        $this->data = json_encode($data);
+        $this->data = $data;
         $this->perPageOptions = $this->perPageOptions ?? $this->config('per_page_options');
         $this->defaultOrderColumn = $this->orderColumn;
         $this->columns = $this->setColumns();
+        $this->options = $this->setOptions();
     }
 
-    public function render(): string
+    public function render(): ?string
     {
-        return route($this->config('route.name'), [
-            $this->getFullTableName(),
-            'data' => $this->getData()
-        ]);
+        $build = '';
+        $attributes = collect($this->config('attributes'));
+        $attributes = $attributes->map(function (string $item, string $key) {
+            return __($item, [
+                'url' => route($this->config('route.name'), [
+                    $this->getFullTableName(),
+                    'data' => $this->getData()
+                ]),
+                'options' => json_encode($this->options)
+            ]);
+        });
+
+        foreach ($attributes as $key => $value) {
+            $build .= is_array(json_decode($value, true))
+                ? $key . "='" . $value . "' " 
+                : $key . '="' . $value . '" ';
+        }
+
+        return trim($build);
     }
 
     public function getFullTableName(): string
@@ -82,11 +98,14 @@ abstract class DataTable
             ->join('.');
     }
 
-    public function getData(?string $key = null): array
+    public function getOption(string $key = null, mixed $default = null): mixed
     {
-        $data = json_decode($this->data, true);
+        return $key ? data_get($this->options, $key, $default) : $this->options;
+    }
 
-        return data_get($data, $key, $data);
+    public function getData(?string $key = null, mixed $default = null): mixed
+    {
+        return data_get($this->data, $key, $default) ?? $this->data;
     }
 
     public function request(string $key): null|string|array
@@ -144,6 +163,13 @@ abstract class DataTable
         });
 
         return $columns->keyBy('alias');
+    }
+
+    private function getColumn(?string $column, string $key = null): mixed
+    {
+        $key = $key ? $column . '.' . $key : $column;
+
+        return data_get($this->columns, $key);
     }
 
     private function setFilterableColumn(Column $column): bool|object
@@ -220,5 +246,46 @@ abstract class DataTable
         }
 
         return null;
+    }
+
+    private function setOptions(): array
+    {
+        $this->orderColumn = $this->getColumn($this->setOrderColumn(), 'name');
+        $this->orderDirection = $this->setOrderDirection();
+
+        return [
+            // 'template' => $this->template ?? $this->config('template'),
+            'table_name' => $this->tableName,
+            // 'table_id' => str($this->table)->replace('.', '-')->toString(),
+            // 'data_source' => $this->getDataSource(),
+            // 'skip_total' => $this->skipTotal,
+            // 'deep_search' => $this->deepSearch ?? $this->config('deep_search'),
+            // 'order_column' => $this->orderColumn,
+            // 'order_direction' => $this->orderDirection,
+            // 'per_page' => $this->setPerPage(),
+            // 'filtered' => $this->getActiveFilterCount(),
+            // 'auto_update_on_filter' => $this->autoUpdateOnFilter ?? $this->config('auto_update_on_filter'),
+            // 'per_page_options' => $this->perPageOptions,
+            // 'storage' => $this->storage ?? $this->config('storage'),
+            // 'save_state' => $this->saveState ?? $this->config('save_state'),
+            // 'save_state_filter' => $this->saveStateFilter ?? $this->config('save_state_filter'),
+            // 'query_string_prefix' => $this->queryStringPrefix,
+            // 'auto_update' => $this->autoUpdate,
+            // 'auto_update_interval' => $this->autoUpdateInterval,
+            // 'on_each_side' => $this->onEachSide ?? $this->config('on_each_side'),
+            // 'search_placeholder' => $this->getSearchPlaceholder($this->searchPlaceholder),
+            // 'url' => request()->fullUrl(),
+            // 'request' => [
+            //     'query' => request()->all(),
+            //     'save' => $this->getSaveableRequest(),
+            //     'map' =>  $this->getRequestMap()
+            // ],
+            // 'data' => $this->data,
+            // 'show_header' => $this->showHeader,
+            // 'show_info' => $this->showInfo,
+            // 'show_page_options' => $this->showPageOptions,
+            // 'show_pagination' => $this->showPagination,
+            // 'attributes' => $this->config('attributes')
+        ];
     }
 }
