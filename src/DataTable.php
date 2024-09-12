@@ -57,7 +57,7 @@ abstract class DataTable
 
     public function __construct(array $data = [])
     {
-        $this->data = $data;
+        $this->data = $this->setData($data);
         $this->perPageOptions = $this->perPageOptions ?? $this->config('per_page_options');
         $this->defaultOrderColumn = $this->orderColumn;
         $this->columns = $this->setColumns();
@@ -71,8 +71,7 @@ abstract class DataTable
         $attributes = $attributes->map(function (string $item, string $key) {
             return __($item, [
                 'url' => route($this->config('route.name'), [
-                    $this->getFullTableName(),
-                    'data' => $this->getData()
+                    Helper::getFullTableName($this)
                 ]),
                 'options' => json_encode($this->options)
             ]);
@@ -85,17 +84,6 @@ abstract class DataTable
         }
 
         return trim($build);
-    }
-
-    public function getFullTableName(): string
-    {
-        return str(get_class($this))
-            ->replaceFirst('App\\' . $this->config('directory') . '\\', '')
-            ->explode('\\')
-            ->transform(function (string $value, int $key) {
-                return str($value)->kebab()->toString();
-            })
-            ->join('.');
     }
 
     public function getOption(string $key = null, mixed $default = null): mixed
@@ -135,6 +123,20 @@ abstract class DataTable
         $key = $key ? 'datatable.' . $key : 'datatable';
 
         return config($key, $default);
+    }
+
+    private function setData(array $data): array
+    {   
+        $key = 'datatable.' . Helper::getFullTableName($this, '-');
+
+        if (request()->session()->missing($key)) {
+            request()->session()->put($key, [
+                'table' => get_class($this),
+                'data'=> $data
+            ]);
+        }
+
+        return $data;
     }
 
     private function setColumns(): Collection
