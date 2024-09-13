@@ -2,6 +2,7 @@
 
 namespace VariableSign\DataTable;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
@@ -62,6 +63,13 @@ abstract class DataTable
         $this->defaultOrderColumn = $this->orderColumn;
         $this->columns = $this->setColumns();
         $this->options = $this->setOptions();
+    }
+
+    public function api(): JsonResponse
+    {
+        return response()->json([
+            'options' => $this->options
+        ]);
     }
 
     public function render(): ?string
@@ -129,12 +137,10 @@ abstract class DataTable
     {   
         $key = 'datatable.' . Helper::getFullTableName($this, '-');
 
-        if (request()->session()->missing($key)) {
-            request()->session()->put($key, [
-                'table' => get_class($this),
-                'data'=> $data
-            ]);
-        }
+        request()->session()->put($key, [
+            'table' => get_class($this),
+            'data'=> $data
+        ]);
 
         return $data;
     }
@@ -174,7 +180,21 @@ abstract class DataTable
         return data_get($this->columns, $key);
     }
 
-    private function setFilterableColumn(Column $column): bool|object
+    private function getSearchableColumns(): Collection
+    {
+        return $this->columns->filter(function (mixed $value, string $key) {
+                return $value['searchable'];
+            });
+    }
+
+    private function getSortableColumns(): Collection
+    {
+        return $this->columns->filter(function (mixed $value, string $key) {
+                return $value['sortable'];
+            });
+    }
+
+    private function setFilterableColumn(object $column): bool|object
     {
         if (is_callable($column->filterable)) {
             return call_user_func($column->filterable);
@@ -250,32 +270,41 @@ abstract class DataTable
         return null;
     }
 
+    private function getSearchPlaceholder(?string $placeholder = null): string
+    {
+        $searchable = $this->getSearchableColumns();
+        $by = $searchable->isEmpty() ? '' : ' by ';
+        $search = $searchable->pluck('alias')
+            ->map(fn (string $item) => str_replace('_', ' ', $item))
+            ->join(', ', ' or ');
+
+        return $placeholder ?: 'Search ' . $this->tableName . $by . $search . '...';
+    }
+
     private function setOptions(): array
     {
         $this->orderColumn = $this->getColumn($this->setOrderColumn(), 'name');
         $this->orderDirection = $this->setOrderDirection();
 
         return [
-            // 'template' => $this->template ?? $this->config('template'),
+            'template' => $this->template ?? $this->config('template'),
             'table_name' => $this->tableName,
-            // 'table_id' => str($this->table)->replace('.', '-')->toString(),
-            // 'data_source' => $this->getDataSource(),
-            // 'skip_total' => $this->skipTotal,
-            // 'deep_search' => $this->deepSearch ?? $this->config('deep_search'),
-            // 'order_column' => $this->orderColumn,
-            // 'order_direction' => $this->orderDirection,
-            // 'per_page' => $this->setPerPage(),
+            'skip_total' => $this->skipTotal,
+            'deep_search' => $this->deepSearch ?? $this->config('deep_search'),
+            'order_column' => $this->orderColumn,
+            'order_direction' => $this->orderDirection,
+            'per_page' => $this->setPerPage(),
+            'per_page_options' => $this->perPageOptions,
+            'on_each_side' => $this->onEachSide ?? $this->config('on_each_side'),
+            'save_state' => $this->saveState ?? $this->config('save_state'),
+            'save_state_filter' => $this->saveStateFilter ?? $this->config('save_state_filter'),
+            'query_string_prefix' => $this->queryStringPrefix,
+            'search_placeholder' => $this->getSearchPlaceholder($this->searchPlaceholder),
             // 'filtered' => $this->getActiveFilterCount(),
             // 'auto_update_on_filter' => $this->autoUpdateOnFilter ?? $this->config('auto_update_on_filter'),
-            // 'per_page_options' => $this->perPageOptions,
             // 'storage' => $this->storage ?? $this->config('storage'),
-            // 'save_state' => $this->saveState ?? $this->config('save_state'),
-            // 'save_state_filter' => $this->saveStateFilter ?? $this->config('save_state_filter'),
-            // 'query_string_prefix' => $this->queryStringPrefix,
             // 'auto_update' => $this->autoUpdate,
             // 'auto_update_interval' => $this->autoUpdateInterval,
-            // 'on_each_side' => $this->onEachSide ?? $this->config('on_each_side'),
-            // 'search_placeholder' => $this->getSearchPlaceholder($this->searchPlaceholder),
             // 'url' => request()->fullUrl(),
             // 'request' => [
             //     'query' => request()->all(),
