@@ -56,6 +56,18 @@ abstract class DataTable
 
     private array $data;
 
+    private array $sections = [
+        'table',
+        'filters',
+        'tags',
+        'search',
+        'pagination',
+        'info',
+        'length',
+        'loader',
+        'region'
+    ];
+
     public function __construct(array $data = [])
     {
         $this->data = $this->setData($data);
@@ -300,6 +312,11 @@ abstract class DataTable
             'save_state_filter' => $this->saveStateFilter ?? $this->config('save_state_filter'),
             'query_string_prefix' => $this->queryStringPrefix,
             'search_placeholder' => $this->getSearchPlaceholder($this->searchPlaceholder),
+            'show_header' => $this->showHeader,
+            'show_info' => $this->showInfo,
+            'show_page_options' => $this->showPageOptions,
+            'show_pagination' => $this->showPagination,
+            'sections' => $this->sections,
             // 'filtered' => $this->getActiveFilterCount(),
             // 'auto_update_on_filter' => $this->autoUpdateOnFilter ?? $this->config('auto_update_on_filter'),
             // 'storage' => $this->storage ?? $this->config('storage'),
@@ -311,11 +328,6 @@ abstract class DataTable
             //     'save' => $this->getSaveableRequest(),
             //     'map' =>  $this->getRequestMap()
             // ],
-            // 'data' => $this->data,
-            // 'show_header' => $this->showHeader,
-            // 'show_info' => $this->showInfo,
-            // 'show_page_options' => $this->showPageOptions,
-            // 'show_pagination' => $this->showPagination,
             // 'attributes' => $this->config('attributes')
         ];
     }
