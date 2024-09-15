@@ -33,7 +33,9 @@ return [
     |
     */
 
-    'save_state_filter' => [],
+    'save_state_filter' => [
+        'search'
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -188,8 +190,7 @@ return [
         'order_column' => 'order_column',
         'order_direction' => 'order_direction',
         'per_page' => 'per_page',
-        'filters' => 'filters',
-        'export' => 'export'
+        'filters' => 'filters'
     ],
 
     /*
@@ -206,17 +207,40 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Data Attributes
+    | Trigger Data Attributes
     |--------------------------------------------------------------------------
     |
-    | Data attributes for identifying various parts of the datatable through JavaScript
+    | Data attributes for identifying various triggers
     |
     */
 
-    'attributes' => [
+    'triggers' => [
+        'checkbox' => 'data-datatable-checkbox',
+        'filters' => 'data-datatable-filter',
+        'length' => 'data-datatable-per-page',
+        'orderDirection' => 'data-datatable-order-direction',
+        'orderColumn' => 'data-datatable-order-column',
+        'pagination' => 'data-datatable-page-index',
+        'search' => 'data-datatable-search-input'
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Config Data Attributes
+    |--------------------------------------------------------------------------
+    |
+    | Data attributes for setting config for the JavaScript component
+    |
+    */
+
+    'config' => [
+        'id' => ':id',
         'data-ui-datatable' => 'true',
         'data-datatable-url' => ':url',
-        'data-datatable-options' => ':options'
+        'data-datatable-save-state' => ':save_state',
+        'data-datatable-save-state-filter' => ':save_state_filter',
+        'data-datatable-request-map' => ':request_map',
+        'data-datatable-triggers' => ':triggers'
     ],
 
 ];

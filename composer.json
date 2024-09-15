@@ -22,7 +22,8 @@
     ],
     "require": {
         "php": "^8.2",
-        "illuminate/support": "^10|^11"
+        "illuminate/support": "^10|^11",
+        "spatie/laravel-collection-macros": "^7.14"
     },
     "require-dev": {
         "orchestra/testbench": "^8",
