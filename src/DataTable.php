@@ -54,8 +54,6 @@ abstract class DataTable
 
     private array $options;
 
-    private string $table;
-
     private ?string $defaultOrderColumn = null;
 
     private array $data;
@@ -602,14 +600,14 @@ abstract class DataTable
     private function paginator(): Paginator
     {
         if (in_array($this->getDataSourceType(), ['eloquent', 'query'])) {
-            return $this->showTotal
+            return !$this->showTotalItems()
                 ? $this->queryBuilder()
                     ->simplePaginate(perPage: $this->perPage, pageName: $this->getRequestMap('page'))
                 : $this->queryBuilder()
                     ->paginate(perPage: $this->perPage, pageName: $this->getRequestMap('page'));
         }
 
-        return $this->showTotal
+        return !$this->showTotalItems()
             ? $this->collectionBuilder()
                 ->simplePaginate(perPage: $this->perPage, pageName: $this->getRequestMap('page'))
             : $this->collectionBuilder()

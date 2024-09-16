@@ -1,7 +1,7 @@
 @if (!$datatable->isNotFound($paginator))
 
     {{-- First page --}} 
-    @if (!$datatable->showTotalItems())  
+    @if ($datatable->showTotalItems())  
         <button type="button" data-datatable-page-index="1" @disabled($paginator->onFirstPage())>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
@@ -17,7 +17,7 @@
     </button>  
 
     {{-- Pagination Elements --}}
-    @if (!$datatable->showTotalItems())  
+    @if ($datatable->showTotalItems())  
         @foreach ($paginator->onEachSide($datatable->linksOnEachSide())->links()->getData()['elements'] as $element)
             {{-- "Three Dots" Separator --}}
             @if (is_string($element))
@@ -51,7 +51,7 @@
     </button>  
 
     {{-- Last page --}} 
-    @if (!$datatable->showTotalItems())  
+    @if ($datatable->showTotalItems())  
         <button type="button" data-datatable-page-index="{{ $paginator->lastPage() }}" @disabled(!$paginator->hasMorePages())>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" />
