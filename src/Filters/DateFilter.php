@@ -2,11 +2,16 @@
 
 namespace VariableSign\DataTable\Filters;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use VariableSign\DataTable\Traits\HasMagicGet;
+use VariableSign\DataTable\Traits\HasMagicCall;
+use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class DateFilter
 {
+    use HasMagicCall, HasMagicGet;
+
     private bool $range = false;
 
     private string $start= 'Start date';
@@ -17,7 +22,7 @@ class DateFilter
 
     private ?string $format = null;
 
-    public array $options = [];
+    private array $options = [];
 
     public function withOptions(array $options): self
     {
@@ -61,7 +66,7 @@ class DateFilter
         return $this;
     }
 
-    public function getFilter(string $column, mixed $value, Builder|QueryBuilder $query): Builder|QueryBuilder
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
         $value = $this->formatDate($value);
 
@@ -85,7 +90,7 @@ class DateFilter
         return $query;
     }
 
-    public function getDataSource(): ?array
+    private function getDataSource(): ?array
     {
         return [
             'default' => $this->default,
@@ -94,7 +99,7 @@ class DateFilter
         ];
     }
 
-    public function getElement(): array
+    private function getElement(): array
     {
         return [
             'type' => 'date',

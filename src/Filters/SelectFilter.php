@@ -2,12 +2,16 @@
 
 namespace VariableSign\DataTable\Filters;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
+use VariableSign\DataTable\Traits\HasMagicGet;
+use VariableSign\DataTable\Traits\HasMagicCall;
+use Illuminate\Database\Eloquent\Builder as Eloquent;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class SelectFilter
 {
+    use HasMagicCall, HasMagicGet;
+
     private array $dataSource;
 
     private string $value = 'id';
@@ -16,7 +20,7 @@ class SelectFilter
 
     private string $defaultLabel = 'All';
 
-    public array $options = [];
+    private array $options = [];
 
     public function dataSource(array|Collection $dataSource): self
     {
@@ -53,7 +57,7 @@ class SelectFilter
         return $this;
     }
 
-    public function getFilter(string $column, mixed $value, Builder|QueryBuilder $query): Builder|QueryBuilder
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
         return match ($value) {
             '' => $query,
@@ -61,7 +65,7 @@ class SelectFilter
         };
     }
 
-    public function getDataSource(): ?array
+    private function getDataSource(): ?array
     {
         $data = [
             '' => $this->defaultLabel
@@ -74,7 +78,7 @@ class SelectFilter
         return $data;
     }
 
-    public function getElement(): array
+    private function getElement(): array
     {
         return [
             'type' => 'select',

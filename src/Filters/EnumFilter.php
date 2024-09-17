@@ -3,16 +3,20 @@
 namespace VariableSign\DataTable\Filters;
 
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Builder;
+use VariableSign\DataTable\Traits\HasMagicGet;
+use VariableSign\DataTable\Traits\HasMagicCall;
+use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class EnumFilter
 {
+    use HasMagicCall, HasMagicGet;
+
     private array $dataSource;
 
     private string $defaultLabel = 'All';
 
-    public array $options = [];
+    private array $options = [];
 
     public function dataSource(array|Collection $dataSource): self
     {
@@ -35,7 +39,7 @@ class EnumFilter
         return $this;
     }
 
-    public function getFilter(string $column, mixed $value, Builder|QueryBuilder $query): Builder|QueryBuilder
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
         return match ($value) {
             '' => $query,
@@ -43,7 +47,7 @@ class EnumFilter
         };
     }
 
-    public function getDataSource(): ?array
+    private function getDataSource(): ?array
     {
         $data = [
             '' => $this->defaultLabel
@@ -56,7 +60,7 @@ class EnumFilter
         return $data;
     }
 
-    public function getElement(): array
+    private function getElement(): array
     {
         return [
             'type' => 'select',

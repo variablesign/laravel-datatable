@@ -3,11 +3,16 @@
 namespace VariableSign\DataTable\Filters;
 
 use Closure;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use VariableSign\DataTable\Traits\HasMagicGet;
+use VariableSign\DataTable\Traits\HasMagicCall;
+use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class BooleanFilter
 {
+    use HasMagicCall, HasMagicGet;
+
     private object $true;
 
     private object $false;
@@ -18,7 +23,7 @@ class BooleanFilter
 
     private string $defaultLabel = 'All';
 
-    public array $options = [];
+    private array $options = [];
 
     private function dataSource(): array
     {
@@ -59,7 +64,7 @@ class BooleanFilter
         return $this;
     }
 
-    public function getFilter(string $column, mixed $value, Builder|QueryBuilder $query): Builder|QueryBuilder
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
         return match ($value) {
             'true' => $this->true ? call_user_func($this->true, $query) : $query->where($column, 1),
@@ -68,12 +73,12 @@ class BooleanFilter
         };
     }
 
-    public function getDataSource(): ?array
+    private function getDataSource(): ?array
     {
         return $this->dataSource();
     }
 
-    public function getElement(): array
+    private function getElement(): array
     {
         return [
             'type' => 'select',

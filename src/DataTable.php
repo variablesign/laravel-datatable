@@ -85,10 +85,11 @@ abstract class DataTable
             'datatable' => $this,
             'paginator' => $paginator
         ];
-
+ 
         return response()->json([
             'isNotEmpty' => $this->isNotEmpty($data['paginator']),
             'isNotFound' => $this->isNotFound($data['paginator']),
+            'request' => request()->all(),
             // 'options' => $this->options,
             'html' => [
                 'table' =>  view($this->view('table'), $data)->render(),
@@ -111,10 +112,11 @@ abstract class DataTable
                 'url' => route($this->config('route.name'), [
                     Helper::getFullTableName($this)
                 ]),
+                'auto_filter' => 'true',
                 'save_state' => $this->saveState ?? $this->config('save_state') ? 'true' : 'false',
                 'save_state_filter' => json_encode($this->saveStateFilter ?? $this->config('save_state_filter')),
                 'request_map' =>  json_encode($this->getRequestMap()),
-                'triggers' => json_encode($this->config('triggers'))
+                'references' => json_encode($this->config('references'))
             ]);
         });
 
@@ -160,7 +162,9 @@ abstract class DataTable
 
         foreach ($attributes as $key => $value) {
             if ($value !== null) {
-                $build .= $key . '="' . $value . '" ';
+                $build .= is_int($key) 
+                    ? $value . '="" '
+                    : $key . '="' . $value . '" ';
             }
         }
 
@@ -434,7 +438,7 @@ abstract class DataTable
             });
     }
 
-    private function setFilterableColumn(object $column): bool|object
+    private function setFilterableColumn(Column $column): bool|object
     {
         if (is_callable($column->filterable)) {
             return call_user_func($column->filterable);
@@ -524,9 +528,9 @@ abstract class DataTable
             // 'auto_update_interval' => $this->autoUpdateInterval,
             // 'url' => request()->fullUrl(),
             // 'request' => [
-            //     'query' => request()->all(),
-            //     'save' => $this->getSaveableRequest(),
-            //     'map' =>  $this->getRequestMap()
+                // 'query' => request()->all(),
+                // 'save' => $this->getSaveableRequest(),
+                // 'map' =>  $this->getRequestMap()
             // ],
             // 'attributes' => $this->config('attributes')
         ];

@@ -2,16 +2,21 @@
 
 namespace VariableSign\DataTable\Filters;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use VariableSign\DataTable\Traits\HasMagicGet;
+use VariableSign\DataTable\Traits\HasMagicCall;
+use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class NumberFilter
 {
+    use HasMagicCall, HasMagicGet;
+
     private string $min = 'Min';
 
     private string $max = 'Max';
 
-    public array $options = [];
+    private array $options = [];
 
     public function withOptions(array $options): self
     {
@@ -34,7 +39,7 @@ class NumberFilter
         return $this;
     }
 
-    public function getFilter(string $column, mixed $value, Builder|QueryBuilder $query): Builder|QueryBuilder
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
         if (array_key_exists('min', $value) && array_key_exists('max', $value)) {
             return $query->where($column, '>=', $value['min'])
@@ -52,7 +57,7 @@ class NumberFilter
         return $query;
     }
 
-    public function getDataSource(): ?array
+    private function getDataSource(): ?array
     {
         return [
             'min' => $this->min,
@@ -60,7 +65,7 @@ class NumberFilter
         ];
     }
 
-    public function getElement(): array
+    private function getElement(): array
     {
         return [
             'type' => 'number',

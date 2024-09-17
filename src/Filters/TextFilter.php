@@ -2,14 +2,19 @@
 
 namespace VariableSign\DataTable\Filters;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use VariableSign\DataTable\Traits\HasMagicGet;
+use VariableSign\DataTable\Traits\HasMagicCall;
+use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class TextFilter
 {
+    use HasMagicCall, HasMagicGet;
+    
     private bool $operators = false;
 
-    public array $options = [];
+    private array $options = [];
 
     public function withOptions(array $options): self
     {
@@ -25,7 +30,7 @@ class TextFilter
         return $this;
     }
 
-    public function getFilter(string $column, mixed $value, Builder|QueryBuilder $query): Builder|QueryBuilder
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
         $operator = '';
 
@@ -47,7 +52,7 @@ class TextFilter
         };
     }
 
-    public function getDataSource(): ?array
+    private function getDataSource(): ?array
     {
         return [
             '' => 'Equal to',
@@ -59,7 +64,7 @@ class TextFilter
         ];
     }
 
-    public function getElement(): array
+    private function getElement(): array
     {
         return [
             'type' => 'text',

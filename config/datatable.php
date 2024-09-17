@@ -207,21 +207,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Trigger Data Attributes
+    | Reference Data Attributes
     |--------------------------------------------------------------------------
     |
-    | Data attributes for identifying various triggers
+    | Data attributes for identifying various elements
     |
     */
 
-    'triggers' => [
+    'references' => [
         'checkbox' => 'data-datatable-checkbox',
+        'row' => 'data-datatable-row',
         'filters' => 'data-datatable-filter',
         'length' => 'data-datatable-per-page',
         'orderDirection' => 'data-datatable-order-direction',
         'orderColumn' => 'data-datatable-order-column',
         'pagination' => 'data-datatable-page-index',
-        'search' => 'data-datatable-search-input'
+        'search' => 'data-datatable-search-input',
+        'hidden' => 'data-datatable-hidden'
     ],
 
     /*
@@ -239,8 +241,9 @@ return [
         'data-datatable-url' => ':url',
         'data-datatable-save-state' => ':save_state',
         'data-datatable-save-state-filter' => ':save_state_filter',
+        'data-datatable-auto-filter' => ':auto_filter',
         'data-datatable-request-map' => ':request_map',
-        'data-datatable-triggers' => ':triggers'
+        'data-datatable-references' => ':references'
     ],
 
 ];

@@ -13,7 +13,7 @@ Route::prefix(config('datatable.route.prefix'))
             if (!$class) {
                 return response()->json([
                     'error'=> 'Session data has expired or not found.'
-                ]);
+                ], 422);
             }
 
             $datatable = new $class();

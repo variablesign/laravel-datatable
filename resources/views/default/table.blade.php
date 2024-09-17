@@ -36,7 +36,7 @@
 
         <tbody>
             @foreach ($data as $index => $items)
-                <tr {!! $datatable->formatAttributes($datatable->rowAttributes($items['model'], $index)) !!}>
+                <tr {!! $datatable->formatAttributes($datatable->rowAttributes($items['model'], $index)) !!} data-datatable-row="{{ $index }}">
                     @foreach ($items['columns'] as $column => $values)
                         @if ($values['checkbox']['enabled'])   
                             <td {!! $datatable->formatAttributes($values['attributes']) !!}>

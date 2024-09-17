@@ -4,10 +4,11 @@ namespace VariableSign\DataTable;
 
 use Closure;
 use VariableSign\DataTable\Traits\HasAttributes;
+use VariableSign\DataTable\Traits\HasMagicGet;
 
 class Column
 {
-    use HasAttributes;
+    use HasAttributes, HasMagicGet;
     
     protected ?string $name = null;
 
@@ -122,9 +123,4 @@ class Column
 
         return $this;
     }
-
-    public function __get($name)
-	{
-		return $this->{$name};
-	}
 }
