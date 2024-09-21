@@ -2,16 +2,15 @@
 
 namespace {{ datatableNamespace }};
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use VariableSign\DataTable\DataTable;
-use Illuminate\Database\Query\Builder;
 use VariableSign\DataTable\Facades\Row;
 use VariableSign\DataTable\Facades\Table;
 use VariableSign\DataTable\Facades\Column;
 
 class {{ datatableClass }} extends DataTable
 {
-    protected string $tableName = '{{ modelLowerPlural }}';
+    protected string $tableName = 'items';
 
     protected function columns(): array
     {
@@ -25,7 +24,7 @@ class {{ datatableClass }} extends DataTable
                 //
             ]),
 
-            Row::attributes(function (object ${{ modelLower }}, int $index) {
+            Row::attributes(function (array $item, int $index) {
                 return [
                     //
                 ];
@@ -33,8 +32,8 @@ class {{ datatableClass }} extends DataTable
         ];
     }
 
-    protected function dataSource(): Builder
+    protected function dataSource(): Collection
     {
-        return DB::table('{{ modelLowerPlural }}');
+        return collect([]);
     }
 }

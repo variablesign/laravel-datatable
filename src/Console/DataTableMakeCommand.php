@@ -6,6 +6,8 @@ use Illuminate\Support\Str;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\text;
 
 class DataTableMakeCommand extends GeneratorCommand
 {
@@ -30,6 +32,12 @@ class DataTableMakeCommand extends GeneratorCommand
      */
     protected $type = 'DataTable';
 
+    private string $dataSource = '';
+
+    private string $withExample = '';
+
+    private string $withModel = '';
+
     /**
      * Get the stub file for the generator.
      *
@@ -37,10 +45,17 @@ class DataTableMakeCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        if ($this->option('example')) {
-            return $this->resolveStubPath('/stubs/datatable.example.stub');
+        $stub = match ($this->dataSource) {
+            'Eloquent Builder' => '.eloquent',
+            'Query Builder' => '',
+            'Collection' => '.collection',
+            default => ''
+        };
+
+        if ($this->withExample === 'Yes') {
+            return $this->resolveStubPath('/stubs/datatable' . $stub . '.example.stub');
         } else {
-            return $this->resolveStubPath('/stubs/datatable.stub');
+            return $this->resolveStubPath('/stubs/datatable' . $stub . '.stub');
         }
     }
 
@@ -65,33 +80,63 @@ class DataTableMakeCommand extends GeneratorCommand
      */
     protected function buildClass($name)
     {
+        $this->dataSource = select(
+            label: 'What type of data source will you use?',
+            options: ['Eloquent Builder', 'Query Builder', 'Collection'],
+            default: 'Eloquent Builder'
+        );
+
+        $this->withExample = select(
+            label: 'Would you like to include an example code?',
+            options: ['Yes', 'No'],
+            default: 'Yes'
+        );
+
         $class = class_basename(Str::ucfirst($name));
-
-        $namespaceModel = $this->option('model')
-            ? $this->qualifyModel($this->option('model'))
-            : $this->qualifyModel($this->guessModelName($name));
-
+        $namespaceModel = $this->qualifyModel($this->guessModelName($name));
         $model = class_basename($namespaceModel);
-
-        $modelClass = '\\' . $namespaceModel;
-
-        $defaultColumn = class_exists($modelClass) ? (new $modelClass)->{'getKeyName'}() : 'id';
-
         $namespace = $this->getNamespace(
             Str::replaceFirst($this->rootNamespace(), 'App\\' . config('datatable.directory') . '\\', $this->qualifyClass($this->getNameInput()))
         );
 
-        $splitModelName = implode(' ', Str::ucsplit($model));
-        $modelLowerPlural = Str::plural(Str::lower($splitModelName));
-
         $replace = [
             '{{ datatableNamespace }}' => $namespace,
-            '{{ namespacedModel }}' => $namespaceModel,
-            '{{ model }}' => $model,
-            '{{ modelLowerPlural }}' => $modelLowerPlural,
-            '{{ defaultColumn }}' => $defaultColumn,
-            '{{ datatableClass }}' => $class,
+            '{{ datatableClass }}' => $class
         ];
+
+        if ($this->dataSource !== 'Collection') {
+            $modelName = '';
+
+            $this->withModel = select(
+                label: 'Select a Model or manually enter its name.',
+                options: [$namespaceModel, 'Manual'],
+                default: 'Manual'
+            );
+
+            if ($this->withModel === 'Manual') {
+                $modelName = text(
+                    label: 'What is the Model name?',
+                    required: true
+                );
+            }
+
+            $manualModel = $this->qualifyModel($modelName);
+            $modelClass = '\\' . $this->withModel === 'Manual' ? $manualModel : $this->withModel;
+            $model = $this->withModel === 'Manual' ? $modelName : $model;
+            $namespaceModel = $this->withModel === 'Manual' ? $manualModel : $namespaceModel;
+            $defaultColumn = class_exists($modelClass) ? (new $modelClass)->{'getKeyName'}() : 'id';
+    
+            $splitModelName = implode(' ', Str::ucsplit($model));
+            $modelLower = Str::lower($splitModelName);
+    
+            $replace = array_merge($replace, [
+                '{{ namespacedModel }}' => $namespaceModel,
+                '{{ model }}' => $model,
+                '{{ modelLower }}' => $modelLower,
+                '{{ modelLowerPlural }}' => Str::plural($modelLower),
+                '{{ defaultColumn }}' => $defaultColumn
+            ]);
+        }
 
         return str_replace(
             array_keys($replace), array_values($replace), parent::buildClass($name)
@@ -127,10 +172,11 @@ class DataTableMakeCommand extends GeneratorCommand
             $name = substr($name, 0, -5);
         }
 
+        $nameOnly = Str::afterLast($name, '\\');
         $modelName = $this->qualifyModel(Str::after($name, $this->rootNamespace()));
         
         if (Str::contains($name, '\\')) {
-            $modelName = $this->qualifyModel(Str::afterLast($name, '\\'));
+            $modelName = $this->qualifyModel($nameOnly);
         }
 
         if (class_exists($modelName)) {
@@ -138,10 +184,10 @@ class DataTableMakeCommand extends GeneratorCommand
         }
 
         if (is_dir(app_path('Models/'))) {
-            return $this->rootNamespace().'Models\Model';
+            return $this->rootNamespace().'Models\\' . $nameOnly;
         }
 
-        return $this->rootNamespace().'Model';
+        return $this->rootNamespace() . $nameOnly;
     }
 
     /**
@@ -161,16 +207,16 @@ class DataTableMakeCommand extends GeneratorCommand
      *
      * @return array
      */
-    protected function getOptions(): array
-    {
-        return [
-            ['model', 'm', InputOption::VALUE_OPTIONAL, 'The name of the model.'],
-            ['example', 'e', InputOption::VALUE_NONE, 'Include example code snippets.']
-        ];
-    }
+    // protected function getOptions(): array
+    // {
+    //     return [
+    //         ['model', 'm', InputOption::VALUE_OPTIONAL, 'The name of the model.'],
+    //         ['example', 'e', InputOption::VALUE_NONE, 'Include example code snippets.']
+    //     ];
+    // }
 
-    private function getClassName($name)
-    {
-        return class_basename(Str::ucfirst($name));
-    }
+    // private function getClassName($name)
+    // {
+    //     return class_basename(Str::ucfirst($name));
+    // }
 }

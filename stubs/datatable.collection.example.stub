@@ -1,0 +1,283 @@
+<?php
+
+namespace {{ datatableNamespace }};
+
+use Illuminate\View\View;
+use Illuminate\Support\Collection;
+use VariableSign\DataTable\DataTable;
+use VariableSign\DataTable\Facades\Row;
+use VariableSign\DataTable\Facades\Table;
+use VariableSign\DataTable\Facades\Column;
+use VariableSign\DataTable\Facades\Filter;
+
+class {{ datatableClass }} extends DataTable
+{
+    protected string $tableName = 'items';
+
+    protected ?string $orderColumn = 'id';
+
+    protected string $orderDirection = 'asc';
+
+    protected function columns(): array
+    {
+        return [
+            Column::name('id')
+                ->alias('checkbox')
+                ->checkbox(),
+
+            Column::name('index')
+                ->alias('index')
+                ->title('#')
+                ->index(),
+
+            Column::name('staff_id')
+                ->title('Staff Number')
+                ->searchable()
+                ->sortable()
+                ->edit(function (mixed $value, array $item, int $index) {
+                    return $item['staff_id'];
+                }),
+
+            Column::name('name')
+                ->title('Name')
+                ->searchable(['first_name', 'last_name'])
+                ->sortable(['first_name', 'last_name'])
+                ->edit(function (mixed $value, array $item, int $index) {
+                    return $item['first_name'] . ' ' . $item['last_name'];
+                }),
+
+            Column::name('role')
+                ->title('Role')
+                ->searchable()
+                ->sortable()
+                ->filterable(function () {
+                    return Filter::select()
+                        ->dataSource([
+                            'Construction Manager',
+                            'Construction Worker',
+                            'Electrician',
+                            'Engineer',
+                            'Project Manager',
+                            'Subcontractor',
+                            'Supervisor',
+                            'Surveyor'
+                        ]);
+                }),
+
+            Column::name('actions')
+                ->attributes([
+                    'class' => 'w-0 p-2',
+                ])
+                ->edit(function (mixed $value, array $item, int $index) {
+                    return view('user.actions', compact('item'));
+                })
+        ];
+    }
+
+    protected function setup(): array
+    {
+        return [
+            Table::attributes([
+                'class' => 'default-table table-hover'
+            ]),
+
+            Row::attributes(function (array $item, int $index) {
+                return [
+                    'class' => 'hover:bg-gray-50',
+                    'data-index' => $index
+                ];
+            })
+        ];
+    }
+
+    protected function dataSource(): Collection
+    {
+        return collect([
+            [
+                "id" => 1,
+                "first_name" => "Kenon",
+                "last_name" => "Bourgaize",
+                "staff_id" => 6041,
+                "role" => "Supervisor",
+            ],
+            [
+                "id" => 2,
+                "first_name" => "Charlotte",
+                "last_name" => "Daenen",
+                "staff_id" => 5520,
+                "role" => "Construction Worker",
+            ],
+            [
+                "id" => 3,
+                "first_name" => "Gasparo",
+                "last_name" => "Kimmel",
+                "staff_id" => 6117,
+                "role" => "Subcontractor",
+            ],
+            [
+                "id" => 4,
+                "first_name" => "Niels",
+                "last_name" => "De la Perrelle",
+                "staff_id" => 7026,
+                "role" => "Engineer",
+            ],
+            [
+                "id" => 5,
+                "first_name" => "Onfre",
+                "last_name" => "Silkston",
+                "staff_id" => 6613,
+                "role" => "Project Manager",
+            ],
+            [
+                "id" => 6,
+                "first_name" => "Leonelle",
+                "last_name" => "Ollerton",
+                "staff_id" => 5655,
+                "role" => "Construction Manager",
+            ],
+            [
+                "id" => 7,
+                "first_name" => "Paolina",
+                "last_name" => "Sherwin",
+                "staff_id" => 7203,
+                "role" => "Surveyor",
+            ],
+            [
+                "id" => 8,
+                "first_name" => "Dulcia",
+                "last_name" => "Basilotta",
+                "staff_id" => 7314,
+                "role" => "Construction Worker",
+            ],
+            [
+                "id" => 9,
+                "first_name" => "Amy",
+                "last_name" => "Dyne",
+                "staff_id" => 4001,
+                "role" => "Subcontractor",
+            ],
+            [
+                "id" => 10,
+                "first_name" => "Timmie",
+                "last_name" => "Ortner",
+                "staff_id" => 4979,
+                "role" => "Construction Manager",
+            ],
+            [
+                "id" => 11,
+                "first_name" => "Farlie",
+                "last_name" => "Domsalla",
+                "staff_id" => 6103,
+                "role" => "Construction Worker",
+            ],
+            [
+                "id" => 12,
+                "first_name" => "Collie",
+                "last_name" => "Zambon",
+                "staff_id" => 4402,
+                "role" => "Surveyor",
+            ],
+            [
+                "id" => 13,
+                "first_name" => "Sallie",
+                "last_name" => "McWhan",
+                "staff_id" => 6031,
+                "role" => "Construction Worker",
+            ],
+            [
+                "id" => 14,
+                "first_name" => "Shelli",
+                "last_name" => "Oldknowe",
+                "staff_id" => 5671,
+                "role" => "Construction Worker",
+            ],
+            [
+                "id" => 15,
+                "first_name" => "Tamra",
+                "last_name" => "Oman",
+                "staff_id" => 6727,
+                "role" => "Construction Worker",
+            ],
+            [
+                "id" => 16,
+                "first_name" => "Onida",
+                "last_name" => "Deegan",
+                "staff_id" => 4250,
+                "role" => "Supervisor",
+            ],
+            [
+                "id" => 17,
+                "first_name" => "Marsh",
+                "last_name" => "Manger",
+                "staff_id" => 7939,
+                "role" => "Construction Worker",
+            ],
+            [
+                "id" => 18,
+                "first_name" => "Fraze",
+                "last_name" => "Fairy",
+                "staff_id" => 4705,
+                "role" => "Construction Worker",
+            ],
+            [
+                "id" => 19,
+                "first_name" => "Merwyn",
+                "last_name" => "Deeny",
+                "staff_id" => 7121,
+                "role" => "Surveyor",
+            ],
+            [
+                "id" => 20,
+                "first_name" => "Guglielma",
+                "last_name" => "Felton",
+                "staff_id" => 6358,
+                "role" => "Surveyor",
+            ],
+            [
+                "id" => 21,
+                "first_name" => "Evangelina",
+                "last_name" => "Speachley",
+                "staff_id" => 6519,
+                "role" => "Construction Worker",
+            ],
+            [
+                "id" => 22,
+                "first_name" => "Charlene",
+                "last_name" => "Lawton",
+                "staff_id" => 5921,
+                "role" => "Engineer",
+            ],
+            [
+                "id" => 23,
+                "first_name" => "Phillip",
+                "last_name" => "Rielly",
+                "staff_id" => 6400,
+                "role" => "Electrician",
+            ],
+            [
+                "id" => 24,
+                "first_name" => "Welch",
+                "last_name" => "Beese",
+                "staff_id" => 6855,
+                "role" => "Electrician",
+            ],
+            [
+                "id" => 25,
+                "first_name" => "Brian",
+                "last_name" => "Reast",
+                "staff_id" => 5741,
+                "role" => "Supervisor",
+            ],
+        ]);
+    }
+
+    protected function emptyState(): string|View
+    {
+        return 'Start adding items!';
+    }
+
+    protected function notFound(?string $keyword): string|View
+    {
+        return 'No results found for ' . $keyword;
+    }
+}

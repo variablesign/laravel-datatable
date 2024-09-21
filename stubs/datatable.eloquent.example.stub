@@ -2,14 +2,15 @@
 
 namespace {{ datatableNamespace }};
 
+use {{ namespacedModel }};
+use App\Models\Role;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\DB;
 use VariableSign\DataTable\DataTable;
-use Illuminate\Database\Query\Builder;
 use VariableSign\DataTable\Facades\Row;
 use VariableSign\DataTable\Facades\Table;
 use VariableSign\DataTable\Facades\Column;
 use VariableSign\DataTable\Facades\Filter;
+use Illuminate\Database\Eloquent\Builder;
 
 class {{ datatableClass }} extends DataTable
 {
@@ -37,7 +38,7 @@ class {{ datatableClass }} extends DataTable
                     $query->orWhere('staff_id', 'like', '%'. $keyword .'%');
                 })
                 ->sortable()
-                ->edit(function (mixed $value, object ${{ modelLower }}, int $index) {
+                ->edit(function (mixed $value, {{ model }} ${{ modelLower }}, int $index) {
                     return ${{ modelLower }}->staff_id;
                 }),
 
@@ -45,30 +46,36 @@ class {{ datatableClass }} extends DataTable
                 ->title('Name')
                 ->searchable(['first_name', 'last_name'])
                 ->sortable(['first_name', 'last_name'])
-                ->edit(function (mixed $value, object ${{ modelLower }}, int $index) {
+                ->edit(function (mixed $value, {{ model }} ${{ modelLower }}, int $index) {
                     return ${{ modelLower }}->first_name . ' ' . ${{ modelLower }}->last_name;
                 }),
 
             Column::name('role')
                 ->title('Role')
-                ->searchable()
-                ->sortable()
+                ->searchable(function (Builder $query, string $keyword) {
+                    $query->orWhereHas('role', function (Builder $query) use ($keyword) {
+                        $query->where('name', 'like', '%'. $keyword .'%');
+                    });
+                })
+                ->sortable(function (Builder $query, $direction) {
+                    $query->orderBy(Role::select('name')->whereColumn('roles.id', 'users.role_id'), $direction);
+                })
                 ->filterable(function () {
                     return Filter::select()
-                        ->dataSource(DB::table('roles')->get())
+                        ->dataSource(Role::all())
                         ->value('id')
                         ->label('name');
                 })
-                ->edit(function (mixed $value, object ${{ modelLower }}, int $index) {
-                    return ${{ modelLower }}->name;
+                ->edit(function (mixed $value, {{ model }} ${{ modelLower }}, int $index) {
+                    return ${{ modelLower }}->role->name;
                 }),
 
             Column::name('actions')
                 ->attributes([
                     'class' => 'w-0 p-2',
                 ])
-                ->edit(function (mixed $value, object ${{ modelLower }}, int $index) {
-                    return view('user.actions', compact('{{ model }}'));
+                ->edit(function (mixed $value, {{ model }} ${{ modelLower }}, int $index) {
+                    return view('user.actions', compact('{{ modelLower }}'));
                 })
         ];
     }
@@ -80,7 +87,7 @@ class {{ datatableClass }} extends DataTable
                 'class' => 'default-table table-hover'
             ]),
 
-            Row::attributes(function (object ${{ modelLower }}, int $index) {
+            Row::attributes(function ({{ model }} ${{ modelLower }}, int $index) {
                 return [
                     'class' => 'hover:bg-gray-50',
                     'data-index' => $index
@@ -91,9 +98,7 @@ class {{ datatableClass }} extends DataTable
 
     protected function dataSource(): Builder
     {
-        return DB::table('{{ modelLowerPlural }}')
-            ->join('roles', 'roles.id', '=', '{{ modelLowerPlural }}.role_id')
-            ->select('{{ modelLowerPlural }}.*', 'roles.title as role');
+        return {{ model }}::with('role');
     }
 
     protected function emptyState(): string|View

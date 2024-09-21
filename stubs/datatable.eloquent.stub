@@ -2,10 +2,10 @@
 
 namespace {{ datatableNamespace }};
 
-use Illuminate\Support\Facades\DB;
+use {{ namespacedModel }};
 use VariableSign\DataTable\DataTable;
-use Illuminate\Database\Query\Builder;
 use VariableSign\DataTable\Facades\Row;
+use Illuminate\Database\Eloquent\Builder;
 use VariableSign\DataTable\Facades\Table;
 use VariableSign\DataTable\Facades\Column;
 
@@ -25,7 +25,7 @@ class {{ datatableClass }} extends DataTable
                 //
             ]),
 
-            Row::attributes(function (object ${{ modelLower }}, int $index) {
+            Row::attributes(function ({{ model }} ${{ modelLower }}, int $index) {
                 return [
                     //
                 ];
@@ -35,6 +35,6 @@ class {{ datatableClass }} extends DataTable
 
     protected function dataSource(): Builder
     {
-        return DB::table('{{ modelLowerPlural }}');
+        return {{ model }}::query();
     }
 }
