@@ -3,15 +3,11 @@
 namespace VariableSign\DataTable\Filters;
 
 use Illuminate\Support\Collection;
-use VariableSign\DataTable\Traits\HasMagicGet;
-use VariableSign\DataTable\Traits\HasMagicCall;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class DateFilter
 {
-    use HasMagicCall, HasMagicGet;
-
     private bool $range = false;
 
     private string $start= 'Start date';
@@ -66,28 +62,27 @@ class DateFilter
         return $this;
     }
 
-    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $builder): Eloquent|QueryBuilder|Collection
     {
         $value = $this->formatDate($value);
 
         if (is_array($value) && array_key_exists('start', $value) && array_key_exists('end', $value)) {
-            return $query->whereDate($column, '>=', $value['start'])
-                ->whereDate($column, '<=', $value['end']);
+            return $builder->whereBetween($column, [$value['start'], $value['end']]);
         }
         
         if (is_array($value) && array_key_exists('start', $value)) {
-            return $query->whereDate($column, '>=', $value['start']);
+            return $builder->where($column, '>=', $value['start']);
         }
 
         if (is_array($value) && array_key_exists('end', $value)) {
-            return $query->whereDate($column, '<=', $value['end']);
+            return $builder->where($column, '<=', $value['end']);
         }
 
         if (!is_array($value)) {
-            return $query->whereDate($column, $value);
+            return $builder->where($column, $value);
         }
 
-        return $query;
+        return $builder;
     }
 
     private function getDataSource(): ?array
@@ -121,4 +116,14 @@ class DateFilter
 
         return now()->createFromFormat($this->format, $value)->format('Y-m-d');
     }
+
+    public function __call($name, $arguments)
+    {
+        return call_user_func([$this, $name], ...$arguments);
+    }
+	
+    public function __get($name)
+	{
+		return $this->{$name};
+	}
 }

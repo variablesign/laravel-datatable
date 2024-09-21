@@ -2,11 +2,16 @@
 
 namespace VariableSign\DataTable;
 
-use VariableSign\DataTable\Traits\HasAttributes;
-
 class Table
 {
-    use HasAttributes;
+    protected null|array $attributes = null;
+    
+    public function attributes(null|array $attributes = null): self
+    {
+        $this->attributes = $attributes;
+
+        return $this;
+    }
 
     public function __get($name)
 	{

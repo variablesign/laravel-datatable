@@ -2,11 +2,18 @@
 
 namespace VariableSign\DataTable;
 
-use VariableSign\DataTable\Traits\HasAttributes;
+use Closure;
 
 class Row
 {
-    use HasAttributes;
+    protected null|array|Closure $attributes = null;
+    
+    public function attributes(null|array|Closure $attributes = null): self
+    {
+        $this->attributes = $attributes;
+
+        return $this;
+    }
 
     public function __get($name)
 	{

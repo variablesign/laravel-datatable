@@ -3,16 +3,12 @@
 namespace VariableSign\DataTable\Filters;
 
 use Illuminate\Support\Collection;
-use VariableSign\DataTable\Traits\HasMagicGet;
-use VariableSign\DataTable\Traits\HasMagicCall;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class EnumFilter
 {
-    use HasMagicCall, HasMagicGet;
-
-    private array $dataSource;
+    private array $dataSource = [];
 
     private string $defaultLabel = 'All';
 
@@ -39,11 +35,11 @@ class EnumFilter
         return $this;
     }
 
-    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $builder): Eloquent|QueryBuilder|Collection
     {
         return match ($value) {
-            '' => $query,
-            default => $query->where($column, $value)
+            '' => $builder,
+            default => $builder->where($column, $value)
         };
     }
 
@@ -67,4 +63,14 @@ class EnumFilter
             'multiple' => false
         ];
     }
+
+    public function __call($name, $arguments)
+    {
+        return call_user_func([$this, $name], ...$arguments);
+    }
+	
+    public function __get($name)
+	{
+		return $this->{$name};
+	}
 }

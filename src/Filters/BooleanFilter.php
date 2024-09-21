@@ -4,18 +4,14 @@ namespace VariableSign\DataTable\Filters;
 
 use Closure;
 use Illuminate\Support\Collection;
-use VariableSign\DataTable\Traits\HasMagicGet;
-use VariableSign\DataTable\Traits\HasMagicCall;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class BooleanFilter
 {
-    use HasMagicCall, HasMagicGet;
+    private ?object $true = null;
 
-    private object $true;
-
-    private object $false;
+    private ?object $false = null;
 
     private string $trueLabel = 'True';
 
@@ -48,28 +44,28 @@ class BooleanFilter
         return $this;
     }
 
-    public function true(?string $label = null, ?Closure $query = null): self
+    public function true(?string $label = null, ?Closure $callback = null): self
     {
         $this->trueLabel = $label;
-        $this->true = $query;
+        $this->true = $callback;
         
         return $this;
     }
 
-    public function false(?string $label = null, ?Closure $query = null): self
+    public function false(?string $label = null, ?Closure $callback = null): self
     {
         $this->falseLabel = $label;
-        $this->false = $query;
+        $this->false = $callback;
         
         return $this;
     }
 
-    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $builder): Eloquent|QueryBuilder|Collection
     {
         return match ($value) {
-            'true' => $this->true ? call_user_func($this->true, $query) : $query->where($column, 1),
-            'false' => $this->false ? call_user_func($this->false, $query) : $query->where($column, 0),
-            default => $query
+            'true' => $this->true ? call_user_func($this->true, $builder) : $builder->where($column, 1),
+            'false' => $this->false ? call_user_func($this->false, $builder) : $builder->where($column, 0),
+            default => $builder
         };
     }
 
@@ -85,4 +81,14 @@ class BooleanFilter
             'multiple' => false
         ];
     }
+
+    public function __call($name, $arguments)
+    {
+        return call_user_func([$this, $name], ...$arguments);
+    }
+	
+    public function __get($name)
+	{
+		return $this->{$name};
+	}
 }

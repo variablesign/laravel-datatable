@@ -19,8 +19,8 @@
                 <label>{{ $filter['title'] }}</label>
 
                 @if ($filter['element']['range'])
-                    <input type="date" name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}][start]" placeholder="{{ $filter['data']['start'] }}" data-datatable-filter/>
-                    <input type="date" name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}][end]" placeholder="{{ $filter['data']['end'] }}" data-datatable-filter/>
+                    <input type="date" name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}][start]" placeholder="{{ $filter['data']['start'] }}" value="{{ data_get($filter, 'value.start') }}" data-datatable-filter/>
+                    <input type="date" name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}][end]" placeholder="{{ $filter['data']['end'] }}" value="{{ data_get($filter, 'value.end') }}" data-datatable-filter/>
                 @else   
                     <input type="date" name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}]" placeholder="{{ $filter['data']['default'] }}" value="{{ $filter['value'] }}" data-datatable-filter/>
                 @endif
@@ -58,4 +58,12 @@
         @endif
 
     @endforeach
+    
+    @if ($datatable->getTotalFilters() > 0)
+        <div>
+            <button type="button" data-datatable-filter-reset>
+                Reset Filter
+            </button>
+        </div>
+    @endif
 </div>

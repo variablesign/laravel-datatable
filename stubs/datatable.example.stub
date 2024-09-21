@@ -112,9 +112,4 @@ class {{ datatableClass }} extends DataTable
     {
         return 'No results found for ' . $keyword;
     }
-
-    public function exporter(Builder|QueryBuilder $query, ?string $format)
-    {
-        return 'Exporter with an HTTP response.';
-    }
 }

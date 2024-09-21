@@ -3,15 +3,11 @@
 namespace VariableSign\DataTable\Filters;
 
 use Illuminate\Support\Collection;
-use VariableSign\DataTable\Traits\HasMagicGet;
-use VariableSign\DataTable\Traits\HasMagicCall;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class NumberFilter
 {
-    use HasMagicCall, HasMagicGet;
-
     private string $min = 'Min';
 
     private string $max = 'Max';
@@ -39,22 +35,21 @@ class NumberFilter
         return $this;
     }
 
-    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $builder): Eloquent|QueryBuilder|Collection
     {
         if (array_key_exists('min', $value) && array_key_exists('max', $value)) {
-            return $query->where($column, '>=', $value['min'])
-                ->where($column, '<=', $value['max']);
+            return $builder->whereBetween($column, [$value['min'], $value['max']]);
         }
         
         if (array_key_exists('min', $value)) {
-            return $query->where($column, '>=', $value['min']);
+            return $builder->where($column, '>=', $value['min']);
         }
 
         if (array_key_exists('max', $value)) {
-            return $query->where($column, '<=', $value['max']);
+            return $builder->where($column, '<=', $value['max']);
         }
 
-        return $query;
+        return $builder;
     }
 
     private function getDataSource(): ?array
@@ -72,4 +67,14 @@ class NumberFilter
             'range' => true
         ];
     }
+
+    public function __call($name, $arguments)
+    {
+        return call_user_func([$this, $name], ...$arguments);
+    }
+	
+    public function __get($name)
+	{
+		return $this->{$name};
+	}
 }

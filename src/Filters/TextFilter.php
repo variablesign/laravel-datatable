@@ -3,15 +3,11 @@
 namespace VariableSign\DataTable\Filters;
 
 use Illuminate\Support\Collection;
-use VariableSign\DataTable\Traits\HasMagicGet;
-use VariableSign\DataTable\Traits\HasMagicCall;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class TextFilter
 {
-    use HasMagicCall, HasMagicGet;
-    
     private bool $operators = false;
 
     private array $options = [];
@@ -30,25 +26,36 @@ class TextFilter
         return $this;
     }
 
-    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $builder): Eloquent|QueryBuilder|Collection
     {
         $operator = '';
-
+        $isCollection = $builder instanceof Collection;
+        
         if (is_array($value)) {
             $operator = data_get($value, 'operator', $operator);
             $value = data_get($value, 'value');
         }
 
         return match ($operator) {
-            '' => $query->where($column, $value),
-            'contains' => $query->where($column, 'like', '%' . $value . '%'),
-            'starts_with' => $query->where($column, 'like', $value . '%'),
-            'ends_with' => $query->where($column, 'like', '%' . $value),
-            'not_equal_to' => $query->where($column, '<>', $value),
-            'empty' => $query->where(function ($query) use ($column) {
-                $query->orWhere($column, null)->orWhere($column, '');
-            }),
-            default => $query
+            '' => $builder->where($column, $value),
+            'contains' => $isCollection 
+                ? $builder->filter(function (array $item) use ($column, $value) {
+                    return strpos($item[$column], $value) !== false;
+                })
+                : $builder->where($column, 'like', '%' . $value . '%'),
+            'starts_with' => $isCollection 
+                ? $builder->filter(function (array $item) use ($column, $value) {
+                    return str_starts_with($item[$column], $value);
+                })
+                : $builder->where($column, 'like', $value . '%'),
+            'ends_with' => $isCollection 
+                ? $builder->filter(function (array $item) use ($column, $value) {
+                    return str_ends_with($item[$column], $value);
+                })
+                : $builder->where($column, 'like', '%' . $value),
+            'not_equal_to' => $builder->where($column, '<>', $value),
+            'empty' => $builder->whereIn($column, ['', null]),
+            default => $builder
         };
     }
 
@@ -71,4 +78,14 @@ class TextFilter
             'operators' => $this->operators
         ];
     }
+
+    public function __call($name, $arguments)
+    {
+        return call_user_func([$this, $name], ...$arguments);
+    }
+	
+    public function __get($name)
+	{
+		return $this->{$name};
+	}
 }

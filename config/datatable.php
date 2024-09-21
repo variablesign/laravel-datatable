@@ -20,7 +20,7 @@ return [
     |
     */
 
-    'save_state' => false,
+    'save_state' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -39,19 +39,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Storage
-    |--------------------------------------------------------------------------
-    |
-    | Table states are stored in the browser's "local" storage by default.
-    | You can set the value to "session" if you just want the stored 
-    | data to be available per session.
-    |
-    */
-
-    'storage' => 'local',
-
-    /*
-    |--------------------------------------------------------------------------
     | Deep Search
     |--------------------------------------------------------------------------
     |
@@ -61,7 +48,7 @@ return [
     |
     */
 
-    'deep_search' => false,
+    'deep_search' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -142,9 +129,11 @@ return [
 
     'route' => [
         'prefix' => 'datatable',
-        'uri' => '/fetch/table/{table}',
-        'name' => 'datatable.fetch.table',
-        'middleware' => ['web']
+        'middleware' => ['web'],
+        'table' => [
+            'uri' => '/fetch/table/{table}',
+            'name' => 'datatable.fetch.table'
+        ]
     ],
 
     /*
@@ -158,16 +147,40 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Auto Update
+    | Minimum Search Length
     |--------------------------------------------------------------------------
     |
-    | Auto refresh table after a set interval in seconds.
+    | The minimum length of inputted search length to receive before processing.
     |
     */
 
-    'auto_update' => false,
+    'min_search_length' => 2,
 
-    'auto_update_interval' => 60,
+    /*
+    |--------------------------------------------------------------------------
+    | Auto Update On Filter
+    |--------------------------------------------------------------------------
+    |
+    | Automatically send a request when a filter input value is changed.
+    | Set to false if you want to manually add a button to trigger filter requests. 
+    |
+    */
+
+    'auto_update_on_filter' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delay
+    |--------------------------------------------------------------------------
+    |
+    | The time to wait in milliseconds before the table is redrawn after a search
+    | or filter event is fired.
+    |
+    */
+
+    'search_delay' => 500,
+
+    'auto_filter_delay' => 750,
 
     /*
     |--------------------------------------------------------------------------
@@ -195,18 +208,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Auto Update On Filter
-    |--------------------------------------------------------------------------
-    |
-    | Automatically send a request when a filter input value is changed.
-    | Set to false if you want to manually add a button to trigger filter requests. 
-    |
-    */
-
-    'auto_update_on_filter' => true,
-
-    /*
-    |--------------------------------------------------------------------------
     | Reference Data Attributes
     |--------------------------------------------------------------------------
     |
@@ -218,12 +219,14 @@ return [
         'checkbox' => 'data-datatable-checkbox',
         'row' => 'data-datatable-row',
         'filters' => 'data-datatable-filter',
+        'resetFilter' => 'data-datatable-filter-reset',
         'length' => 'data-datatable-per-page',
         'orderDirection' => 'data-datatable-order-direction',
         'orderColumn' => 'data-datatable-order-column',
         'pagination' => 'data-datatable-page-index',
         'search' => 'data-datatable-search-input',
-        'hidden' => 'data-datatable-hidden'
+        'hidden' => 'data-datatable-hidden',
+        'reload' => 'data-datatable-reload'
     ],
 
     /*
@@ -242,6 +245,9 @@ return [
         'data-datatable-save-state' => ':save_state',
         'data-datatable-save-state-filter' => ':save_state_filter',
         'data-datatable-auto-filter' => ':auto_filter',
+        'data-datatable-auto-filter-delay' => ':auto_filter_delay',
+        'data-datatable-min-search-length' => ':min_search_length',
+        'data-datatable-search-delay' => ':search_delay',
         'data-datatable-request-map' => ':request_map',
         'data-datatable-references' => ':references'
     ],

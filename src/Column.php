@@ -3,13 +3,9 @@
 namespace VariableSign\DataTable;
 
 use Closure;
-use VariableSign\DataTable\Traits\HasAttributes;
-use VariableSign\DataTable\Traits\HasMagicGet;
 
 class Column
 {
-    use HasAttributes, HasMagicGet;
-    
     protected ?string $name = null;
 
     protected ?string $alias = null;
@@ -29,6 +25,8 @@ class Column
     protected bool|array|Closure $searchable = false;
 
     protected bool|array|Closure $sortable = false;
+
+    protected null|array|Closure $attributes = null;
 
     protected bool|Closure $filterable = false;
 
@@ -94,6 +92,13 @@ class Column
 
         return $this;
     }
+    
+    public function attributes(null|array|Closure $attributes = null): self
+    {
+        $this->attributes = $attributes;
+
+        return $this;
+    }
 
     // public function colgroup(null|array|Closure $attributes = null): self
     // {
@@ -123,4 +128,9 @@ class Column
 
         return $this;
     }
+
+    public function __get($name)
+	{
+		return $this->{$name};
+	}
 }
