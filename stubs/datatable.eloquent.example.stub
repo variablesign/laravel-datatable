@@ -3,7 +3,6 @@
 namespace {{ datatableNamespace }};
 
 use {{ namespacedModel }};
-use App\Models\Role;
 use Illuminate\View\View;
 use VariableSign\DataTable\DataTable;
 use VariableSign\DataTable\Facades\Row;
