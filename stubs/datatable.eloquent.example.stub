@@ -74,7 +74,7 @@ class {{ datatableClass }} extends DataTable
                     'class' => 'w-0 p-2',
                 ])
                 ->edit(function (mixed $value, {{ model }} ${{ modelLower }}, int $index) {
-                    return view('user.actions', compact('{{ modelLower }}'));
+                    return view('{{ modelLower }}.actions', compact('{{ modelLower }}'));
                 })
         ];
     }
