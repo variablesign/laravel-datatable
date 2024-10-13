@@ -333,7 +333,7 @@ abstract class DataTable
         return $this->showTotal;
     }
 
-    public function linksOnEachSide(): bool
+    public function linksOnEachSide(): number
     {
         return $this->onEachSide ?? $this->config('on_each_side');
     }
