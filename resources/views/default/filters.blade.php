@@ -50,7 +50,7 @@
         @if ($filter['element']['type'] == 'number')      
             <div>
                 <label>{{ $filter['title'] }}</label>
-                <div class="flex gap-4">
+                <div>
                     <input type="number" name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}][min]" placeholder="{{ $filter['data']['min'] }}" value="{{ data_get($filter, 'value.min') }}" data-datatable-filter/>
                     <input type="number" name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}][max]" placeholder="{{ $filter['data']['max'] }}" value="{{ data_get($filter, 'value.max') }}" data-datatable-filter/>
                 </div>
