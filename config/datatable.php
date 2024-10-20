@@ -219,6 +219,7 @@ return [
         'checkbox' => 'data-datatable-checkbox',
         'row' => 'data-datatable-row',
         'filters' => 'data-datatable-filter',
+        'filterCount' => 'data-datatable-filter-count',
         'resetFilter' => 'data-datatable-filter-reset',
         'length' => 'data-datatable-per-page',
         'orderDirection' => 'data-datatable-order-direction',
