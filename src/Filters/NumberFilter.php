@@ -5,21 +5,15 @@ namespace VariableSign\DataTable\Filters;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use VariableSign\DataTable\Traits\InteractsWithFilter;
 
 class NumberFilter
 {
+    use InteractsWithFilter;
+    
     private string $min = 'Min';
 
     private string $max = 'Max';
-
-    private array $options = [];
-
-    public function withOptions(array $options): self
-    {
-        $this->options = $options;
-
-        return $this;
-    }
 
     public function min(string $placeholder): self
     {
@@ -35,21 +29,25 @@ class NumberFilter
         return $this;
     }
 
-    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $builder): Eloquent|QueryBuilder|Collection
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
+        if (is_callable($this->builder)) {
+            return call_user_func($this->builder, $query, $column, $value);
+        }
+        
         if (array_key_exists('min', $value) && array_key_exists('max', $value)) {
-            return $builder->whereBetween($column, [$value['min'], $value['max']]);
+            return $query->whereBetween($column, [$value['min'], $value['max']]);
         }
         
         if (array_key_exists('min', $value)) {
-            return $builder->where($column, '>=', $value['min']);
+            return $query->where($column, '>=', $value['min']);
         }
 
         if (array_key_exists('max', $value)) {
-            return $builder->where($column, '<=', $value['max']);
+            return $query->where($column, '<=', $value['max']);
         }
 
-        return $builder;
+        return $query;
     }
 
     private function getDataSource(): ?array
@@ -67,14 +65,4 @@ class NumberFilter
             'range' => true
         ];
     }
-
-    public function __call($name, $arguments)
-    {
-        return call_user_func([$this, $name], ...$arguments);
-    }
-	
-    public function __get($name)
-	{
-		return $this->{$name};
-	}
 }

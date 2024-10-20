@@ -6,9 +6,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use VariableSign\DataTable\Traits\InteractsWithFilter;
 
 class SelectFilter
 {
+    use InteractsWithFilter;
+    
     private array $dataSource = [];
 
     private string $value = 'id';
@@ -17,18 +20,9 @@ class SelectFilter
 
     private string $defaultLabel = 'All';
 
-    private array $options = [];
-
     public function dataSource(array|Collection $dataSource): self
     {
         $this->dataSource = $dataSource instanceof Collection ? $dataSource->toArray() : $dataSource;
-
-        return $this;
-    }
-
-    public function withOptions(array $options): self
-    {
-        $this->options = $options;
 
         return $this;
     }
@@ -54,11 +48,15 @@ class SelectFilter
         return $this;
     }
 
-    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $builder): Eloquent|QueryBuilder|Collection
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
+        if (is_callable($this->builder)) {
+            return call_user_func($this->builder, $query, $column, $value);
+        }
+        
         return match ($value) {
-            '' => $builder,
-            default => $builder->where($column, $value)
+            '' => $query,
+            default => $query->where($column, $value)
         };
     }
 
@@ -90,14 +88,4 @@ class SelectFilter
             'multiple' => false
         ];
     }
-
-    public function __call($name, $arguments)
-    {
-        return call_user_func([$this, $name], ...$arguments);
-    }
-	
-    public function __get($name)
-	{
-		return $this->{$name};
-	}
 }

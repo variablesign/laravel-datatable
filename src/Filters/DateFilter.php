@@ -5,9 +5,12 @@ namespace VariableSign\DataTable\Filters;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use VariableSign\DataTable\Traits\InteractsWithFilter;
 
 class DateFilter
 {
+    use InteractsWithFilter;
+
     private bool $range = false;
 
     private string $start= 'Start date';
@@ -17,15 +20,6 @@ class DateFilter
     private string $default = 'Select date';
 
     private ?string $format = null;
-
-    private array $options = [];
-
-    public function withOptions(array $options): self
-    {
-        $this->options = $options;
-
-        return $this;
-    }
 
     public function start(string $placeholder): self
     {
@@ -62,27 +56,31 @@ class DateFilter
         return $this;
     }
 
-    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $builder): Eloquent|QueryBuilder|Collection
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
         $value = $this->formatDate($value);
 
+        if (is_callable($this->builder)) {
+            return call_user_func($this->builder, $query, $column, $value);
+        }
+
         if (is_array($value) && array_key_exists('start', $value) && array_key_exists('end', $value)) {
-            return $builder->whereBetween($column, [$value['start'], $value['end']]);
+            return $query->whereBetween($column, [$value['start'], $value['end']]);
         }
         
         if (is_array($value) && array_key_exists('start', $value)) {
-            return $builder->where($column, '>=', $value['start']);
+            return $query->where($column, '>=', $value['start']);
         }
 
         if (is_array($value) && array_key_exists('end', $value)) {
-            return $builder->where($column, '<=', $value['end']);
+            return $query->where($column, '<=', $value['end']);
         }
 
         if (!is_array($value)) {
-            return $builder->where($column, $value);
+            return $query->where($column, $value);
         }
 
-        return $builder;
+        return $query;
     }
 
     private function getDataSource(): ?array
@@ -116,14 +114,4 @@ class DateFilter
 
         return now()->createFromFormat($this->format, $value)->format('Y-m-d');
     }
-
-    public function __call($name, $arguments)
-    {
-        return call_user_func([$this, $name], ...$arguments);
-    }
-	
-    public function __get($name)
-	{
-		return $this->{$name};
-	}
 }

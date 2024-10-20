@@ -2,70 +2,61 @@
 
 namespace VariableSign\DataTable\Filters;
 
-use Closure;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder as Eloquent;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use VariableSign\DataTable\Traits\InteractsWithFilter;
 
 class BooleanFilter
 {
-    private ?object $true = null;
+    use InteractsWithFilter;
+    
+    private string $true = 'True';
 
-    private ?object $false = null;
+    private string $false = 'False';
 
-    private string $trueLabel = 'True';
-
-    private string $falseLabel = 'False';
-
-    private string $defaultLabel = 'All';
-
-    private array $options = [];
+    private string $default = 'All';
 
     private function dataSource(): array
     {
         return [
-            '' => $this->defaultLabel,
-            'true' => $this->trueLabel,
-            'false' => $this->falseLabel
+            '' => $this->default,
+            'true' => $this->true,
+            'false' => $this->false
         ];
-    }
-
-    public function withOptions(array $options): self
-    {
-        $this->options = $options;
-
-        return $this;
     }
 
     public function default(string $label): self
     {
-        $this->defaultLabel = $label;
+        $this->default = $label;
         
         return $this;
     }
 
-    public function true(?string $label = null, ?Closure $callback = null): self
+    public function true(?string $label = null): self
     {
-        $this->trueLabel = $label;
-        $this->true = $callback;
+        $this->true = $label;
         
         return $this;
     }
 
-    public function false(?string $label = null, ?Closure $callback = null): self
+    public function false(?string $label = null): self
     {
-        $this->falseLabel = $label;
-        $this->false = $callback;
+        $this->false = $label;
         
         return $this;
     }
 
-    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $builder): Eloquent|QueryBuilder|Collection
+    private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
+        if (is_callable($this->builder)) {
+            return call_user_func($this->builder, $query, $column, $value);
+        }
+
         return match ($value) {
-            'true' => $this->true ? call_user_func($this->true, $builder) : $builder->where($column, 1),
-            'false' => $this->false ? call_user_func($this->false, $builder) : $builder->where($column, 0),
-            default => $builder
+            'true' => $query->where($column, 1),
+            'false' => $query->where($column, 0),
+            default => $query
         };
     }
 
@@ -81,14 +72,4 @@ class BooleanFilter
             'multiple' => false
         ];
     }
-
-    public function __call($name, $arguments)
-    {
-        return call_user_func([$this, $name], ...$arguments);
-    }
-	
-    public function __get($name)
-	{
-		return $this->{$name};
-	}
 }
