@@ -227,7 +227,8 @@ return [
         'pagination' => 'data-datatable-page-index',
         'search' => 'data-datatable-search-input',
         'hidden' => 'data-datatable-hidden',
-        'reload' => 'data-datatable-reload'
+        'reload' => 'data-datatable-reload',
+        'clickable' => 'data-datatable-clickable'
     ],
 
     /*

@@ -405,6 +405,7 @@ abstract class DataTable
                     'attributes' => $item->checkboxAttributes
                 ],
                 'attributes' => $item->attributes,
+                'clickable' => $item->clickable,
                 'responsive' => $this->config('breakpoints.' . $item->responsive),
                 'alignment' => $this->config('alignment.' . $item->alignment) ?? $this->config('alignment.left')
             ];
@@ -718,6 +719,10 @@ abstract class DataTable
                 $items[$key]['attributes'] = is_callable($column['attributes'])
                     ? call_user_func($column['attributes'], $value, $model, $index)
                     : $column['attributes'];
+
+                $items[$key]['clickable'] = is_callable($column['clickable'])
+                    ? call_user_func($column['clickable'], $value, $model, $index)
+                    : $column['clickable'];
      
                 $items[$key]['checkbox']['attributes'] = is_callable($column['checkbox']['attributes'])
                     ? call_user_func($column['checkbox']['attributes'], $value, $model, $index)
@@ -726,6 +731,16 @@ abstract class DataTable
                 $items[$key]['checkbox']['enabled'] = $column['checkbox']['enabled'];
                 $items[$key]['responsive'] = $column['responsive'];
                 $items[$key]['alignment'] = $column['alignment'];
+
+                $clickableAttribute = $this->config('references.clickable');
+
+                if (is_array($items[$key]['attributes'])) {
+                    $items[$key]['attributes'][$clickableAttribute] = $items[$key]['clickable'] ? 'true' : 'false';
+                } else {
+                    $items[$key]['attributes'] = [
+                        $clickableAttribute => $items[$key]['clickable'] ? 'true' : 'false'
+                    ];
+                }
             }
 
             $data[$index] = [

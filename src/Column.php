@@ -16,6 +16,8 @@ class Column
 
     protected bool $checkbox = false;
 
+    protected bool $clickable = true;
+
     protected ?Closure $edit = null;
 
     protected ?string $responsive = null;
@@ -125,6 +127,13 @@ class Column
     {
         $this->checkbox = true;
         $this->checkboxAttributes = $attributes;
+
+        return $this;
+    }
+
+    public function clickable(null|bool|Closure $clickable = true): self
+    {
+        $this->clickable = $clickable;
 
         return $this;
     }
