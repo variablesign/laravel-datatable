@@ -32,6 +32,8 @@ class Column
 
     protected bool|Closure $filterable = false;
 
+    protected bool $hidden = false;
+
     // protected null|array|Closure $colgroup = null;
 
     protected null|array|Closure $checkboxAttributes = null;
@@ -91,6 +93,13 @@ class Column
     public function filterable(Closure $filterable): self
     {
         $this->filterable = $filterable;
+
+        return $this;
+    }
+
+    public function hidden(bool $hidden = true): self
+    {
+        $this->hidden = $hidden;
 
         return $this;
     }

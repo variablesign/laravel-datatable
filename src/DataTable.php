@@ -84,7 +84,7 @@ abstract class DataTable
         $paginator = $this->paginator();
         $data = [
             'data' => $this->transformer($paginator),
-            'columns' => $this->columns->values()->all(),
+            'columns' => $this->columns->values()->filter(fn (array $value) => !$value['hidden'])->all(),
             'filters' => $this->getFilter(),
             'datatable' => $this,
             'paginator' => $paginator
@@ -395,6 +395,7 @@ abstract class DataTable
                 'title' => $item->title,
                 'searchable' => $item->searchable,
                 'sortable' => $item->sortable,
+                'hidden' => $item->hidden,
                 'filterable' => $this->setFilterableColumn($item),
                 'ordered' => $item->sortable && $this->setOrderColumn() === $item->alias ? true : false,
                 'direction' => $this->setOrderColumn() === $item->alias ? $this->setOrderDirection() : 'asc',
@@ -482,7 +483,7 @@ abstract class DataTable
 
         return collect($filtered)
             ->filter()
-            ->mapWithKeys(function (mixed $item, mixed $key) {
+            ->mapWithKeys(function (mixed $item, string $key) {
                 $flattened = [];
 
                 if (is_array($item)) {
@@ -700,13 +701,14 @@ abstract class DataTable
     private function transformer(Paginator $paginator): array
     {
         $data = [];
+        $columns = $this->columns->filter(fn (array $value) => !$value['hidden']);
 
         for ($i = 0; $i < count($paginator->items()); $i++) { 
             $items = [];
             $index = $paginator->firstItem() + $i;
             $model = $paginator[$i];
 
-            foreach ($this->columns as $key => $column) {
+            foreach ($columns as $key => $column) {
                 $value = data_get($model, $column['name']);
 
                 if (is_callable($column['edit'])) {
@@ -723,6 +725,10 @@ abstract class DataTable
                 $items[$key]['clickable'] = is_callable($column['clickable'])
                     ? call_user_func($column['clickable'], $value, $model, $index)
                     : $column['clickable'];
+
+                $items[$key]['hidden'] = is_callable($column['hidden'])
+                    ? call_user_func($column['hidden'], $value, $model, $index)
+                    : $column['hidden'];
      
                 $items[$key]['checkbox']['attributes'] = is_callable($column['checkbox']['attributes'])
                     ? call_user_func($column['checkbox']['attributes'], $value, $model, $index)
