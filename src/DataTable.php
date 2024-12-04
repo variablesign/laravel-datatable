@@ -188,21 +188,21 @@ abstract class DataTable
         return !is_null($classes) ? 'class="' . $classes . '"' : '';
     }
 
-    public function tableAttributes(string $appendClasses = null): array
+    public function tableAttributes(?string $defaultClasses = null): array
     {
         $tableSetup = data_get($this->setups, Table::class);
 
         if (is_array($tableSetup?->attributes)) {
-            if (data_get($tableSetup->attributes, 'class') && $appendClasses) {
+            if (data_get($tableSetup->attributes, 'class')) {
                 return array_merge($tableSetup->attributes, [
-                    'class' => $tableSetup->attributes['class'] . ' ' . $appendClasses
+                    'class' => $tableSetup->attributes['class']
                 ]);
             }
 
             return $tableSetup->attributes;
         }
 
-        return $appendClasses ? ['class' => $appendClasses] : [];
+        return $defaultClasses ? ['class' => $defaultClasses] : [];
     }
 
     public function rowAttributes(mixed $model, mixed $index): array
