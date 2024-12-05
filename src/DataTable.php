@@ -86,7 +86,7 @@ abstract class DataTable
             'datatable' => $this,
             'paginator' => $paginator
         ];
-
+        // dd($data);
         return [
             'isNotEmpty' => $this->isNotEmpty($data['paginator']),
             'isNotFound' => $this->isNotFound($data['paginator']),

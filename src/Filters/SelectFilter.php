@@ -59,6 +59,10 @@ class SelectFilter
 
     private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
+        if ($this->multiple && !is_array($value)) {
+            $value = [$value];
+        }
+
         if (is_callable($this->builder)) {
             return call_user_func($this->builder, $query, $column, $value);
         }

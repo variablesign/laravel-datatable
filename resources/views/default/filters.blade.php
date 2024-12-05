@@ -2,15 +2,27 @@
     @foreach ($filters as $column => $filter)        
 
         <!-- Select -->
-        @if ($filter['element']['type'] == 'select')      
+        @if ($filter['element']['type'] === 'select' && !$filter['element']['multiple'])      
             <div>
                 <label>{{ $filter['title'] }}</label>
-                <select name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}]" {{ $filter['element']['multiple'] ? 'multiple' : '' }} data-datatable-filter>
+                <select name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}]" data-datatable-filter>
                     @foreach ($filter['data'] as $value => $label)
-                        @if ($filter['element']['multiple'] && is_array($filter['value']))
+                        <option value="{{ $value }}" @selected($value == $filter['value'])>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+
+        <!-- Multi Select -->
+        @if ($filter['element']['type'] === 'select' && $filter['element']['multiple'])      
+            <div>
+                <label>{{ $filter['title'] }}</label>
+                <select name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}]" multiple data-datatable-filter>
+                    @foreach ($filter['data'] as $value => $label)
+                        @if (is_array($filter['value']))
                             <option value="{{ $value }}" @selected(in_array($value, $filter['value']))>{{ $label }}</option>
                         @else
-                            <option value="{{ $value }}" @selected($value === $filter['value'])>{{ $label }}</option>
+                            <option value="{{ $value }}" @selected($value == $filter['value'])>{{ $label }}</option>
                         @endif
                     @endforeach
                 </select>
@@ -18,7 +30,7 @@
         @endif
 
         <!-- Date -->
-        @if ($filter['element']['type'] == 'date')      
+        @if ($filter['element']['type'] === 'date')      
             <div>
                 <label>{{ $filter['title'] }}</label>
 
@@ -32,7 +44,7 @@
         @endif
 
         <!-- Text -->
-        @if ($filter['element']['type'] == 'text')      
+        @if ($filter['element']['type'] === 'text')      
             <div>
                 <label>{{ $filter['title'] }}</label>
                 <div>
@@ -51,7 +63,7 @@
         @endif
 
         <!-- Number -->
-        @if ($filter['element']['type'] == 'number')      
+        @if ($filter['element']['type'] === 'number')      
             <div>
                 <label>{{ $filter['title'] }}</label>
                 <div>
