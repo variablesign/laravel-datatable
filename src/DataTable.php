@@ -62,16 +62,11 @@ abstract class DataTable
     public function __construct(array $data = [])
     {
         $this->data = $this->setData($data);
-        $this->perPageOptions ??= $this->config('per_page_options');
-        $this->perPage = $this->setPerPage();
-        $this->defaultOrderColumn = $this->orderColumn;
-        $this->columns = $this->setColumns();
-        $this->setups = $this->setSetups();
-        $this->orderColumn = $this->getColumn($this->setOrderColumn(), 'name');
-        $this->orderDirection = $this->setOrderDirection();
         $this->deepSearch ??= $this->config('deep_search');
         $this->autoUpdateOnFilter ??= $this->config('auto_update_on_filter');
         $this->saveStateFilter ??= $this->config('save_state_filter');
+        $this->perPageOptions ??= $this->config('per_page_options');
+        $this->defaultOrderColumn = $this->orderColumn;
     }
 
     public function getTableId(): string
@@ -81,6 +76,8 @@ abstract class DataTable
 
     public function api(): array
     {
+        $this->initialize();
+
         $paginator = $this->paginator();
         $data = [
             'data' => $this->transformer($paginator),
@@ -756,5 +753,14 @@ abstract class DataTable
         }
 
         return $data;
+    }
+
+    private function initialize()
+    {
+        $this->perPage = $this->setPerPage();
+        $this->columns = $this->setColumns();
+        $this->setups = $this->setSetups();
+        $this->orderColumn = $this->getColumn($this->setOrderColumn(), 'name');
+        $this->orderDirection = $this->setOrderDirection();
     }
 }

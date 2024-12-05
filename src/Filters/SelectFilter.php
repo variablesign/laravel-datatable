@@ -14,6 +14,8 @@ class SelectFilter
     
     private array $dataSource = [];
 
+    private bool $multiple = false;
+
     private string $value = 'id';
 
     private string $label = 'name';
@@ -48,15 +50,22 @@ class SelectFilter
         return $this;
     }
 
+    public function multiple(): self
+    {
+        $this->multiple = true;
+        
+        return $this;
+    }
+
     private function getFilter(string $column, mixed $value, Eloquent|QueryBuilder|Collection $query): Eloquent|QueryBuilder|Collection
     {
         if (is_callable($this->builder)) {
             return call_user_func($this->builder, $query, $column, $value);
         }
-        
+
         return match ($value) {
             '' => $query,
-            default => $query->where($column, $value)
+            default => is_array($value) ? $query->whereIn($column, $value) : $query->where($column, $value)
         };
     }
 
@@ -64,9 +73,11 @@ class SelectFilter
     {
         $isList = Arr::isList($this->dataSource);
         $isAssoc = Arr::isAssoc($this->dataSource);
-        $data = [
-            '' => $this->defaultLabel
-        ];
+        $data = [];
+
+        if (!$this->multiple) {
+            $data[''] = $this->defaultLabel;
+        }
 
         foreach ($this->dataSource as $key => $value) {
             if ($isList && !is_array($value)) {
@@ -85,7 +96,7 @@ class SelectFilter
     {
         return [
             'type' => 'select',
-            'multiple' => false
+            'multiple' => $this->multiple
         ];
     }
 }

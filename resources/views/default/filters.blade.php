@@ -5,9 +5,13 @@
         @if ($filter['element']['type'] == 'select')      
             <div>
                 <label>{{ $filter['title'] }}</label>
-                <select name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}]" data-datatable-filter>
-                    @foreach ($filter['data'] as $value => $label)  
-                        <option value="{{ $value }}" @selected($value == $filter['value'])>{{ $label }}</option>
+                <select name="{{ $datatable->getRequestMap('filters') }}[{{ $column }}]" {{ $filter['element']['multiple'] ? 'multiple' : '' }} data-datatable-filter>
+                    @foreach ($filter['data'] as $value => $label)
+                        @if ($filter['element']['multiple'] && is_array($filter['value']))
+                            <option value="{{ $value }}" @selected(in_array($value, $filter['value']))>{{ $label }}</option>
+                        @else
+                            <option value="{{ $value }}" @selected($value === $filter['value'])>{{ $label }}</option>
+                        @endif
                     @endforeach
                 </select>
             </div>
